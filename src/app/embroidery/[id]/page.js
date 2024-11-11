@@ -1,33 +1,45 @@
-"use client"
-import Image from 'next/image'
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+"use client";
 
-// Mock data for a single embroidery scheme
-const getEmbroideryScheme = (id) => ({
-  id,
-  title: `Embroidery Pattern ${id}`,
-  tags: 'art, minimalism',
-  image: '/placeholder.svg?height=400&width=400',
-  difficulty: 'Intermediate',
-  description: 'This is a detailed description of the embroidery pattern. It includes information about the techniques used, the recommended fabric, and any special considerations.',
-  materials: [
-    { item: 'Embroidery Hoop', size: '6 inch' },
-    { item: 'Embroidery Needle', size: 'Size 7' },
-    { item: 'Cotton Thread', colors: 'DMC 310, 3371, 3721' },
-    { item: 'Aida Cloth', count: '14 count' },
-  ],
-  instructions: [
-    'Step 1: Transfer the pattern to your fabric using your preferred method.',
-    'Step 2: Start with the outline stitches using DMC 310.',
-    'Step 3: Fill in the main areas using satin stitch with DMC 3371.',
-    'Step 4: Add details and highlights with DMC 3721.',
-    // Add more steps as needed
-  ]
-})
+import Image from 'next/image';
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
+import useSWR from 'swr';
+import { use } from "react";
 
-export default function EmbroideryDiagram({ id }) {
-  const scheme = getEmbroideryScheme(id)
+const fetcher = async (url) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error('An error occurred while fetching the data.');
+  }
+  return res.json();
+}
+
+export default function EmbroideryDiagram({ params }) {
+  const { id } = use(params);
+
+  const { data: scheme, error } = useSWR(`/api/embroidery-schemas/${id}`, fetcher);
+  console.log(scheme);
+
+  if (error) {
+    return (
+        <div className="min-h-screen bg-[#FFFBF6] flex items-center justify-center">
+          <div className="text-red-500 text-center">
+            <p>Failed to load embroidery scheme. Please try again later.</p>
+            <Link href="/embroidery" className="text-pink-500 underline mt-4 block">
+              Return to Embroidery Schemes
+            </Link>
+          </div>
+        </div>
+    );
+  }
+
+  if (!scheme) {
+    return (
+        <div className="min-h-screen bg-[#FFFBF6] flex items-center justify-center">
+          <div className="text-center">Loading...</div>
+        </div>
+    );
+  }
 
   return (
       <div className="min-h-screen bg-[#FFFBF6] relative">
@@ -54,14 +66,14 @@ export default function EmbroideryDiagram({ id }) {
             <div className="p-4">
               <h2 className="text-2xl font-semibold text-pink-700">{scheme.title}</h2>
               <div className="flex gap-2 mt-2">
-                <span className="text-sm px-2 py-1 rounded-full bg-pink-100 text-pink-700">
-                  {scheme.difficulty}
-                </span>
+              <span className="text-sm px-2 py-1 rounded-full bg-pink-100 text-pink-700">
+                {scheme.difficulty}
+              </span>
                 <span className="text-sm text-gray-600">{scheme.tags}</span>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-8 p-4">
-              <div>
+            <div className="flex flex-col md:flex-row gap-8 p-4">
+              <div className="md:w-1/2">
                 <div className="relative aspect-square mb-4">
                   <Image
                       src={scheme.image}
@@ -72,7 +84,7 @@ export default function EmbroideryDiagram({ id }) {
                 </div>
                 <p className="mb-6">{scheme.description}</p>
               </div>
-              <div className="space-y-6">
+              <div className="md:w-1/2 space-y-6">
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-pink-700">Materials Needed</h2>
                   <table className="w-full text-left">
@@ -83,12 +95,10 @@ export default function EmbroideryDiagram({ id }) {
                     </tr>
                     </thead>
                     <tbody>
-                    {scheme.materials.map((material, index) => (
+                    {Object.entries(scheme.materials).map(([item, spec], index) => (
                         <tr key={index}>
-                          <td className="border-b border-gray-200 py-2">{material.item}</td>
-                          <td className="border-b border-gray-200 py-2">
-                            {material.size || material.colors || material.count}
-                          </td>
+                          <td className="border-b border-gray-200 py-2">{item}</td>
+                          <td className="border-b border-gray-200 py-2">{spec}</td>
                         </tr>
                     ))}
                     </tbody>
@@ -97,8 +107,8 @@ export default function EmbroideryDiagram({ id }) {
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-pink-700">Instructions</h2>
                   <ol className="list-decimal list-inside space-y-2">
-                    {scheme.instructions.map((step, index) => (
-                        <li key={index} className="text-gray-700">{step}</li>
+                    {Object.entries(scheme.instructions).map(([step, instruction], index) => (
+                        <li key={index} className="text-gray-700">{`${step}: ${instruction}`}</li>
                     ))}
                   </ol>
                 </div>
@@ -107,5 +117,5 @@ export default function EmbroideryDiagram({ id }) {
           </div>
         </main>
       </div>
-  )
+  );
 }

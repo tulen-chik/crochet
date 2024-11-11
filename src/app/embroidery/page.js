@@ -1,41 +1,26 @@
 "use client"
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import { Menu } from 'lucide-react'
+import useSWR from 'swr'
 
-// Mock data for embroidery schemes
-const embroiderySchemes = [
-    {
-        id: 1,
-        title: 'Girl with Pearl Earring',
-        tags: 'art, vermeer, minimalism',
-        image: '/placeholder.svg?height=200&width=200',
-        difficulty: 'Intermediate'
-    },
-    {
-        id: 2,
-        title: 'Cute Giraffe',
-        tags: 'animals, giraffe, cute',
-        image: '/placeholder.svg?height=200&width=200',
-        difficulty: 'Beginner'
-    },
-    {
-        id: 3,
-        title: 'Floral Skull',
-        tags: 'art, minimalism, still life',
-        image: '/placeholder.svg?height=200&width=200',
-        difficulty: 'Advanced'
-    },
-    // Add more schemes here...
-]
+// Fetcher function for SWR
+const fetcher = async (url) => {
+    const res = await fetch(url)
+    if (!res.ok) {
+        throw new Error('An error occurred while fetching the data.')
+    }
+    return res.json()
+}
 
 export default function EmbroiderySchemes() {
-    const [schemes, setSchemes] = useState(embroiderySchemes)
+    const [page, setPage] = useState(1)
+    const { data, error } = useSWR(`/api/embroidery-schemas?page=${page}`, fetcher)
 
     const loadMore = () => {
-        // Simulate loading more schemes
-        setSchemes([...schemes, ...embroiderySchemes])
+        setPage(prev => prev + 1)
     }
 
     return (
@@ -57,37 +42,48 @@ export default function EmbroiderySchemes() {
 
             {/* Main content */}
             <main className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {schemes.map((scheme) => (
-                        <Link href={`/embroidery/${scheme.id}`} key={scheme.id}>
-                            <div className="hover:shadow-lg transition-shadow duration-300 bg-[#FFF8E7] border-pink-200 rounded-lg p-4">
-                                <div className="p-4">
-                                    <h2 className="text-lg font-semibold text-pink-700">{scheme.title}</h2>
-                                </div>
-                                <div className="p-4">
-                                    <div className="relative aspect-square mb-3">
-                                        <Image
-                                            src={scheme.image}
-                                            alt={scheme.title}
-                                            fill
-                                            className="rounded-lg object-cover"
-                                        />
+                {error && (
+                    <div className="text-red-500 text-center mb-4">
+                        Failed to load embroidery schemes. Please try again later.
+                    </div>
+                )}
+                {!data && !error && (
+                    <div className="text-center mb-4">Loading...</div>
+                )}
+                {data && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {data.schemes.map((scheme) => (
+                            <Link href={`/embroidery/${scheme.id}`} key={scheme.id}>
+                                <div className="hover:shadow-lg transition-shadow duration-300 bg-[#FFF8E7] border-pink-200 rounded-lg p-4">
+                                    <div className="p-4">
+                                        <h2 className="text-lg font-semibold text-pink-700">{scheme.title}</h2>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-sm text-gray-600">{scheme.tags}</p>
-                                        <span className="text-xs px-2 py-1 rounded-full bg-pink-100 text-pink-700">
-                      {scheme.difficulty}
-                    </span>
+                                    <div className="p-4">
+                                        <div className="relative aspect-square mb-3">
+                                            <Image
+                                                src={"/uploads/" + scheme.image}
+                                                alt={scheme.title}
+                                                fill
+                                                className="rounded-lg object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-sm text-gray-600">{scheme.tags}</p>
+                                            <span className="text-xs px-2 py-1 rounded-full bg-pink-100 text-pink-700">
+                                                {scheme.difficulty}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
                 <div className="mt-8 text-center">
                     <button
                         onClick={loadMore}
                         className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded"
+                        disabled={!data || data.schemes.length === 0 || data.currentPage >= data.totalPages}
                     >
                         Load More
                     </button>

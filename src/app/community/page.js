@@ -3,39 +3,19 @@
 import { useState } from 'react'
 import { Menu, Search, ArrowLeft, ThumbsUp, MessageSquare } from 'lucide-react'
 
-// Mock data for posts
 const posts = [
   {
     id: 1,
     title: "What's a crochet \"hack\" that changed how you crochet?",
     author: "r/crochet",
+    text: "This is where the full post content would go. For this example, we're just displaying the title and metadata.",
     time: "1y ago",
     votes: 767,
     comments: 378,
   },
-  {
-    id: 2,
-    title: "My first crochet ever, made with a kit. Swipe to laugh at what I ended up making",
-    author: "r/crochet",
-    time: "7mo ago",
-    votes: 21000,
-    comments: 1400,
-  },
-  {
-    id: 3,
-    title: "How do you know a knitting/crochet influencer can't knit/crochet?",
-    author: "r/craftsnark",
-    time: "1y ago",
-    votes: 283,
-    comments: 264,
-  },
 ]
-
-// Mock data for communities
 const communities = [
   { name: "r/crochet", members: "1.4M", online: 114 },
-  { name: "r/GeekyCrochet", members: "56K", online: 2 },
-  { name: "r/CrochetBikinis", members: "37K", online: 6 },
 ]
 
 export default function CrochetCommunity() {
@@ -105,7 +85,7 @@ export default function CrochetCommunity() {
                       Posted by {selectedPost.author} {selectedPost.time}
                       <div className="mt-4 text-gray-300">
                         {/* Placeholder for post content */}
-                        This is where the full post content would go. For this example, we're just displaying the title and metadata.
+                        {selectedPost.text}
                       </div>
                     </div>
                   </div>
