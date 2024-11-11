@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router'
+"use client"
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -18,9 +18,7 @@ const getCrochetScheme = (id) => ({
   ]
 })
 
-export default function CrochetDiagram() {
-  const router = useRouter()
-  const { id } = router.query
+export default function CrochetDiagram({ id }) {
   const scheme = getCrochetScheme(id)
 
   return (
