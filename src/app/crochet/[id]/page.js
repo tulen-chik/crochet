@@ -1,29 +1,37 @@
-"use client"
+'use client'
 
+import {useState, useEffect, use} from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
-import useSWR from 'swr'
-import {use} from "react";
 
-const fetcher = async (url) => {
-    const res = await fetch(url)
-    if (!res.ok) {
-        throw new Error('An error occurred while fetching the data.')
-    }
-    return res.json()
-}
+export default function CrochetDiagram({ params: paramsPromise }) {
+    const params = use(paramsPromise);
+    const [scheme, setScheme] = useState(null)
+    const [error, setError] = useState(null)
 
-export default function CrochetDiagram({ params }) {
-    const { id } = use(params);
+    useEffect(() => {
+        const fetchScheme = async () => {
+            try {
+                const res = await fetch(`/api/crochet-schemes/${params.id}`)
+                if (!res.ok) {
+                    throw new Error('An error occurred while fetching the data.')
+                }
+                const data = await res.json()
+                setScheme(data)
+            } catch (err) {
+                setError('Failed to load crochet scheme. Please try again later.')
+            }
+        }
 
-    const { data: scheme, error } = useSWR(`/api/crochet-schemes/${id}`, fetcher)
+        fetchScheme()
+    }, [params.id])
 
     if (error) {
         return (
             <div className="min-h-screen bg-[#FFFBF6] flex items-center justify-center">
                 <div className="text-red-500 text-center">
-                    <p>Failed to load crochet scheme. Please try again later.</p>
+                    <p>{error}</p>
                     <Link href="/crochet" className="text-blue-500 underline mt-4 block">
                         Return to Crochet Schemes
                     </Link>
@@ -40,8 +48,8 @@ export default function CrochetDiagram({ params }) {
         )
     }
 
-    // Преобразуем объект инструкций в массив
-    const instructionsArray = Object.values(scheme.instructions);
+    // Convert instructions object to an array
+    const instructionsArray = Object.values(scheme.instructions)
 
     return (
         <div className="min-h-screen bg-[#FFFBF6] relative">
@@ -71,7 +79,7 @@ export default function CrochetDiagram({ params }) {
                     <div className="flex flex-col md:flex-row gap-8 p-4">
                         <div className="md:w-1/2">
                             <Image
-                                src={scheme.image}
+                                src={"/uploads/" +scheme.image}
                                 alt={scheme.title}
                                 width={400}
                                 height={400}

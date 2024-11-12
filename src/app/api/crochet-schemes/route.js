@@ -34,21 +34,25 @@ export async function GET(req) {
     }
 }
 
-
-export async function POST(req, res) {
-    const { title, colors, description, instructions } = req.body;
+export async function POST(req) {
+    const formData = await req.formData();
+    const title = formData.get('title');
+    const colors = formData.get('colors');
+    const description = formData.get('description');
+    const instructions = formData.get('instructions');
+    const image = formData.get('image'); // Это будет объект File
 
     // Проверка, есть ли файл в запросе
-    if (!req.body.image) {
-        return res.status(400).json({ error: 'Image file is required' });
+    if (!image) {
+        return NextResponse.json({ error: 'Image file is required' }, { status: 400 });
     }
 
-    const imageBuffer = Buffer.from(await req.body.image.arrayBuffer());
-    const uniqueImageName = `${uuidv4()}_${req.body.image.name}`;
+    const uniqueImageName = `${uuidv4()}_${image.name}`;
     const imagePath = path.join(process.cwd(), 'public', 'uploads', uniqueImageName);
+    const buffer = Buffer.from(await image.arrayBuffer());
 
     // Сохранение файла изображения
-    fs.writeFileSync(imagePath, imageBuffer);
+    fs.writeFileSync(imagePath, buffer);
 
     try {
         const result = await sql`
@@ -57,9 +61,9 @@ export async function POST(req, res) {
             RETURNING *
         `;
 
-        return res.status(201).json(result.rows[0]);
+        return NextResponse.json(result.rows[0], { status: 201 });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: error.message });
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
