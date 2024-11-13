@@ -79,7 +79,7 @@ export default function CrochetDiagram({ params: paramsPromise }) {
                     <div className="flex flex-col md:flex-row gap-8 p-4">
                         <div className="md:w-1/2">
                             <Image
-                                src={scheme.image}
+                                src={process.env.BLOB_URL + scheme.image}
                                 alt={scheme.title}
                                 width={400}
                                 height={400}

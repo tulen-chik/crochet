@@ -169,7 +169,7 @@ export default function CrochetSchemes() {
                                     </div>
                                     <div className="p-4">
                                         <Image
-                                            src={scheme.image}
+                                            src={process.env.BLOB_URL + scheme.image}
                                             alt={scheme.title}
                                             width={200}
                                             height={200}
