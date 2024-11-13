@@ -162,7 +162,7 @@ export default function EmbroiderySchemes() {
                                     <div className="p-4">
                                         <div className="relative aspect-square mb-3">
                                             <Image
-                                                src={"/uploads/" + scheme.image}
+                                                src={scheme.image}
                                                 alt={scheme.title}
                                                 fill
                                                 className="rounded-lg object-cover"

@@ -87,7 +87,7 @@ export default function EmbroideryDiagram({ params: paramsPromise }) {
               <div className="md:w-1/2">
                 <div className="relative aspect-square mb-4">
                   <Image
-                      src={"/uploads/" + scheme.image}
+                      src={scheme.image}
                       alt={scheme.title}
                       fill
                       className="rounded-lg object-cover"

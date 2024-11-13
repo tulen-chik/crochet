@@ -49,7 +49,7 @@ export async function DELETE(req) {
         }
 
         const imageName = result.rows[0].image;
-        const imagePath = path.join(process.cwd(), 'public', 'uploads', imageName);
+        const imagePath = path.join(process.cwd(), 'public', imageName);
 
         // Delete the image file from disk if it exists
         if (fs.existsSync(imagePath)) {

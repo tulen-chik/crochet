@@ -46,7 +46,7 @@ export async function POST(req) {
 
     // Генерация уникального имени для изображения
     const uniqueImageName = `${uuidv4()}_${image.name}`;
-    const imagePath = path.join(process.cwd(), 'public', 'uploads', uniqueImageName);
+    const imagePath = path.join(process.cwd(), 'public', uniqueImageName);
     const buffer = Buffer.from(await image.arrayBuffer());
 
     // Сохранение файла изображения

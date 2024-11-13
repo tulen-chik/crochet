@@ -169,7 +169,7 @@ export default function CrochetSchemes() {
                                     </div>
                                     <div className="p-4">
                                         <Image
-                                            src={"/uploads/" + scheme.image}
+                                            src={scheme.image}
                                             alt={scheme.title}
                                             width={200}
                                             height={200}
