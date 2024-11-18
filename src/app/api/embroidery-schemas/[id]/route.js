@@ -1,7 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
-import path from "path";
-import fs from "fs";
+import {del} from "@vercel/blob";
 
 export async function GET(req) {
     const id = req.url.split("/").pop();
@@ -39,7 +38,7 @@ export async function DELETE(req) {
     }
 
     try {
-        // Get the record from the database to find out the image file name
+        // Get the record from the database to retrieve the image URL
         const result = await sql`
             SELECT image FROM embroidery_schemes WHERE id = ${id}
         `;
@@ -48,12 +47,11 @@ export async function DELETE(req) {
             return NextResponse.json({ error: 'Record not found' }, { status: 404 });
         }
 
-        const imageName = result.rows[0].image;
-        const imagePath = path.join(process.cwd(), 'public', imageName);
+        const imageUrl = result.rows[0].image;
 
-        // Delete the image file from disk if it exists
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
+        // Delete the image from Vercel Blob
+        if (imageUrl) {
+            await del(imageUrl);
         }
 
         // Delete the record from the database
@@ -61,8 +59,7 @@ export async function DELETE(req) {
             DELETE FROM embroidery_schemes WHERE id = ${id}
         `;
 
-        // Return a 204 No Content response
-        return NextResponse.json({ error: 'Record was deleted' }, { status: 204 }); // This will send a 204 response with no content
+        return NextResponse.json({ message: 'Record was deleted' }, { status: 200 });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: error.message }, { status: 500 });

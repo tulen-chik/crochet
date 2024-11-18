@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Search } from 'lucide-react'
 
 function SideMenu({ isOpen, onClose }) {
     const menuRef = useRef(null)
@@ -76,11 +76,12 @@ export default function EmbroiderySchemes() {
     const [error, setError] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [filter, setFilter] = useState('')
 
-    const fetchSchemes = async (pageNumber) => {
+    const fetchSchemes = async (pageNumber, filterValue) => {
         setIsLoading(true)
         try {
-            const res = await fetch(`/api/embroidery-schemas?page=${pageNumber}`)
+            const res = await fetch(`/api/embroidery-schemas?page=${pageNumber}&filter=${encodeURIComponent(filterValue)}`)
             if (!res.ok) {
                 throw new Error('An error occurred while fetching the data.')
             }
@@ -115,11 +116,20 @@ export default function EmbroiderySchemes() {
 
     useEffect(() => {
         setData(null);
-        fetchSchemes(page)
+        setPage(1);
+        fetchSchemes(1, filter)
+    }, [filter])
+
+    useEffect(() => {
+        fetchSchemes(page, filter)
     }, [page])
 
     const loadMore = () => {
         setPage((prev) => prev + 1)
+    }
+
+    const handleFilterChange = (e) => {
+        setFilter(e.target.value)
     }
 
     return (
@@ -140,6 +150,20 @@ export default function EmbroiderySchemes() {
             </header>
 
             <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+
+            {/* Filter input */}
+            <div className="container mx-auto px-4 py-4">
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Filter schemes..."
+                        value={filter}
+                        onChange={handleFilterChange}
+                        className="w-full p-2 pl-10 pr-4 rounded-full border border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-pink-400" />
+                </div>
+            </div>
 
             {/* Main content */}
             <main className="container mx-auto px-4 py-8">

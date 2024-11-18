@@ -3,33 +3,41 @@ import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function GET(req) {
-    const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page')) || 1; // Получаем значение page из параметров URL
-    const limit = 9; // Количество элементов на странице
-    const offset = (page - 1) * limit;
+export async function GET(request) {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page')) || 1;
+    const filter = searchParams.get('filter') || '';
+    const limit = 9; // Number of items per page
 
     try {
-        // Подсчет общего количества элементов
-        const countResult = await sql`SELECT COUNT(*) FROM crochet_schemes`;
-        const totalCount = parseInt(countResult.rows[0].count, 10);
-
-        // Получение данных с пагинацией
-        const dataResult = await sql`
-            SELECT * FROM crochet_schemes
-            ORDER BY id
-            LIMIT ${limit} OFFSET ${offset}
+        let query = sql`
+            SELECT id, title, colors, image
+            FROM crochet_schemes
+            WHERE title ILIKE ${`%${filter}%`} OR colors ILIKE ${`%${filter}%`}
+            ORDER BY id DESC
+            LIMIT ${limit} OFFSET ${(page - 1) * limit}
         `;
 
+        const countQuery = sql`
+            SELECT COUNT(*)
+            FROM crochet_schemes
+            WHERE title ILIKE ${`%${filter}%`} OR colors ILIKE ${`%${filter}%`}
+        `;
+
+        const [{ rows }, { rows: countRows }] = await Promise.all([query, countQuery]);
+
+        const totalCount = parseInt(countRows[0].count);
+        const totalPages = Math.ceil(totalCount / limit);
+
         return NextResponse.json({
-            data: dataResult.rows,
-            totalCount,
+            data: rows,
             currentPage: page,
-            totalPages: Math.ceil(totalCount / limit),
+            totalPages: totalPages,
+            totalCount: totalCount
         });
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('Error fetching crochet schemes:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
 

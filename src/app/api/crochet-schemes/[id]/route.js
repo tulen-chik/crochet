@@ -1,7 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs';
+import {del} from "@vercel/blob";
 
 export async function GET(req) {
     const id = req.url.split("/").pop();
@@ -39,7 +38,7 @@ export async function DELETE(req) {
     }
 
     try {
-        // Получаем запись из базы данных, чтобы узнать имя файла изображения
+        // Get the record from the database to retrieve the image URL
         const result = await sql`
             SELECT image FROM crochet_schemes WHERE id = ${id}
         `;
@@ -48,20 +47,19 @@ export async function DELETE(req) {
             return NextResponse.json({ error: 'Record not found' }, { status: 404 });
         }
 
-        const imageName = result.rows[0].image;
-        const imagePath = path.join(process.cwd(), 'public', 'uploads', imageName);
+        const imageUrl = result.rows[0].image;
 
-        // Удаляем файл изображения с диска, если он существует
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
+        // Delete the image from Vercel Blob
+        if (imageUrl) {
+            await del(imageUrl);
         }
 
-        // Удаляем запись из базы данных
+        // Delete the record from the database
         await sql`
             DELETE FROM crochet_schemes WHERE id = ${id}
         `;
 
-        return NextResponse.json({ error: 'Record was deleted' }, { status: 204 });
+        return NextResponse.json({ message: 'Record was deleted' }, { status: 200 });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: error.message }, { status: 500 });

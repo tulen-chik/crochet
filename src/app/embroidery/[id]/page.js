@@ -98,11 +98,11 @@ export default function EmbroideryDiagram({ params: paramsPromise }) {
               <div className="md:w-1/2 space-y-6">
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-pink-700">Instructions</h2>
-                  <ol className="list-decimal list-inside space-y-2">
+                  <div className="list-decimal list-inside space-y-2">
                     {instructionsArray.map((instruction, index) => (
-                        <li key={index} className="text-gray-700">{instruction}</li>
+                        <div key={index} className="text-gray-700">{instruction}</div>
                     ))}
-                  </ol>
+                  </div>
                 </div>
               </div>
             </div>

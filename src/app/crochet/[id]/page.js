@@ -90,11 +90,11 @@ export default function CrochetDiagram({ params: paramsPromise }) {
                         </div>
                         <div className="md:w-1/2">
                             <h2 className="text-xl font-semibold mb-4">Instructions</h2>
-                            <ol className="list-decimal list-inside space-y-2">
+                            <div className="list-decimal list-inside space-y-2">
                                 {instructionsArray.map((step, index) => (
                                     <li key={index}>{step}</li>
                                 ))}
-                            </ol>
+                            </div>
                         </div>
                     </div>
                 </div>
